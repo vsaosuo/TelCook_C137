@@ -1,0 +1,20 @@
+Food Name:
+Catagory:                   breakfast, lunch, dinner
+Cook Time:                  in minutes
+Main Ingredient:            anything else beside codimnets  {name, amount, unit}
+Sub Ingredient:             condiments  {name, amount, unit}
+URL to food:                https://.....
+Extra Cooking Resources:    slow cook, microwave, etc.
+tags:                       extra tags like vegetarian, expensive, asian food, etc.
+
+Sample JSON file
+{
+    "fname": "",
+    "cat": "",
+    "cTime":"",
+    "mIngred":[{"",##, ""},{"", ##, ""},{"", ##, ""}],
+    "sIngred":[{"",##, ""},{"", ##, ""},{"", ##, ""}],
+    "source":"",
+    "exCookRes":["","",""],
+    "tags":["","",""]
+}
