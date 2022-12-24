@@ -1,4 +1,4 @@
-const {tel_token} = require('./config.json');
+const {tel_token} = require('./env.json');
 const { Telegraf } = require('telegraf');
 const bot = new Telegraf(tel_token);
 
@@ -41,7 +41,7 @@ bot.on('message', (context) =>{
         userGreetingState[context.update.message.chat.username][state] = context.update.message.text;
         state++;
         userGreetingState[context.update.message.chat.username].state = state;
-        
+
         if(state < MAX_GREETING_STATE){
             // Send another message
             bot.telegram.sendMessage(context.update.message.chat.id, greeting_conversation[state],{
