@@ -1,0 +1,35 @@
+conn = new Mongo();
+db = conn.getDB("glipglopfood");
+
+result = db.users.insert([
+    {
+        userTelInfo: {
+            id: 414137573,
+            is_bot: false,
+            first_name: 'Saosuo',
+            last_name: 'Visal',
+            username: 'visal_saosuo',
+            language_code: 'en',
+            chatid: 414137573
+        },
+        prefName: 'Visal',
+        institution: 'University of British Columbia',
+        foodPref: 'Asian, Italian, Mexican'
+    },
+    {
+        userTelInfo: {
+            id: 414137573,
+            is_bot: false,
+            first_name: 'Stev',
+            last_name: 'Adam',
+            username: 'stev_adam',
+            language_code: 'en',
+            chatid: 414137573
+        },
+        prefName: 'Stev',
+        institution: 'University of British Columbia',
+        foodPref: 'Asian, Italian, Mexican'
+    }
+]);
+
+print(result);

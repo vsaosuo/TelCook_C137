@@ -1,6 +1,18 @@
+// Telegram setup
 const {tel_token} = require('./env.json');
 const { Telegraf } = require('telegraf');
 const bot = new Telegraf(tel_token);
+
+// Database setup
+const Database = require('./Database.js');
+/** 
+ * MongoDB setup
+ *  Default url: mongodb://localhost:27017
+ *  Database name: glipglopfood
+ *  On success: [MongoClient] Connected to mongodb://localhost:27017/glipglopfood
+ */
+var db = Database("mongodb://localhost:27017", "cpen322-messenger");
+
 
 /* ---------- Telegram Section ---------- */
 // List of university
@@ -26,11 +38,11 @@ bot.start(function(context){
         }
     });
 
+    context.update.message.from.chatid = context.update.message.chat.id;
     // Setup data type
     usersData[context.update.message.chat.username] = {
         state: 0,   /* 0: get name; 1: get university; 2: get food preference; 3: final word*/
         userTelInfo: context.update.message.from,   /* field info { id, is_bot, first_name, last_name, username, language_code } */
-        chatid: context.update.message.chat.id,
         prefName: "",
         institution: "",
         foodPref: ""
