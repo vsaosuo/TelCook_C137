@@ -32,14 +32,13 @@ Database.prototype.addUser = function(userData){
 		new Promise((resolve, reject) => {
             try{
                 if(userData)
-                    db.collection("users").insertOne(userData, function(err, result){
+                    // Only update the exist user
+                    db.collection("users").replaceOne({"userTelInfo.username": userData.userTelInfo.username}, userData, { upsert: true }, function(err, result){
                         if(err) reject(err);
 
-                        db.collection("users").findOne({"_id": ObjectId.createFromHexString(result.insertedId.toHexString())}, function(err, result){
-                            if(err) reject(err);
-                            resolve(result);
-                        });
-                    })
+                        if(result.acknowledged) resolve(result);
+                        else reject();
+                    });
             } catch(err){
                 reject(new Error(err));
             }

@@ -11,7 +11,7 @@ const Database = require('./Database.js');
  *  Database name: glipglopfood
  *  On success: [MongoClient] Connected to mongodb://localhost:27017/glipglopfood
  */
-var db = Database("mongodb://localhost:27017", "cpen322-messenger");
+var db = Database("mongodb://localhost:27017", "glipglopfood");
 
 
 /* ---------- Telegram Section ---------- */
@@ -85,7 +85,23 @@ bot.on('message', (context) =>{
             bot.telegram.sendMessage(context.update.message.chat.id, outputString);
 
             // Upload data to database
+            var userInfoDatabase = {};
+            userInfoDatabase.userTelInfo = usersData[context.update.message.chat.username].userTelInfo;
+            userInfoDatabase.prefName = usersData[context.update.message.chat.username].prefName;
+            userInfoDatabase.institution = usersData[context.update.message.chat.username].institution;
+            userInfoDatabase.foodPref = usersData[context.update.message.chat.username].foodPref;
+
+            db.addUser(userInfoDatabase).then((data) =>{
+                console.log("upload user data: ", data);
+            }, (err) => console.log(err));
         }
+    }
+
+    if(context.update.message.text == "me!"){
+        db.getUser(context.update.message.chat.username).then((data)=>{
+            console.log("Get user data: ", data);
+            bot.telegram.sendMessage(data.userTelInfo.chatid, JSON.stringify(data));
+        }, (err)=> console.log(err))
     }
     console.log("usersData: ", usersData);
 })
