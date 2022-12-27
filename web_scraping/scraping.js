@@ -1,10 +1,14 @@
 const cheerio = require("cheerio");
 const axios = require("axios");
 
-const url = "https://tasty.co/recipe/salmon-sinigang-as-made-by-ruby-ibarra";
+var tastyURL = [
+    "https://tasty.co/recipe/homemade-dumplings",
+    "https://tasty.co/recipe/salmon-sinigang-as-made-by-ruby-ibarra",
+    "https://tasty.co/recipe/chicken-teriyaki-chow-mein"
+];
 // const url = "https://www.york.ac.uk/teaching/cws/wws/webpage1.html";
 
-async function getRecipe(url){
+async function getRecipe_Tasty(url){
     try{
         const res = await axios.get(url, {
             headers: { "Accept-Encoding": "gzip,deflate,compress" } 
@@ -18,7 +22,8 @@ async function getRecipe(url){
             servingSize: parseInt($("p.servings-display").eq(0).text().replace(/[a-zA-Z]|\s/g, '')),
             ingredients: [],
             source: url,
-            webName: ""
+            webName: "",
+            nutrition: []
         }
 
         // Get a list of ingredients
@@ -32,10 +37,20 @@ async function getRecipe(url){
         var weblink= new URL(url);
         food.webName = weblink.hostname;
 
+        // Get nutrition details
+        $("div.nutrition-details").find("li").toArray().forEach((ele) => {
+            var i = $(ele).text();
+            if(!food.nutrition.includes(i))
+                food.nutrition.push(i);
+        })
+
         console.log(food);
+        return food;
     } catch (err) {
         console.error(err);
     }
 }
 
-getRecipe(url);
+for(var i of tastyURL){
+    getRecipe_Tasty(i);
+}
