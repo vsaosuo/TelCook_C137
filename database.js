@@ -66,4 +66,23 @@ Database.prototype.getUser = function(username){
     )
 }
 
+Database.prototype.addFood = function(foodData){
+	return this.connected.then(db =>
+		new Promise((resolve, reject) => {
+            try{
+                if(foodData)
+                    // Only update the exist user
+                    db.collection("allFood").replaceOne({"source": foodData.source}, foodData, { upsert: true }, function(err, result){
+                        if(err) reject(err);
+
+                        if(result.acknowledged) resolve(result);
+                        else reject();
+                    });
+            } catch(err){
+                reject(new Error(err));
+            }
+		})
+	)
+}
+
 module.exports = Database;
