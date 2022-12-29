@@ -85,4 +85,34 @@ Database.prototype.addFood = function(foodData){
 	)
 }
 
+Database.prototype.getOneRandomFoodExecpt = function(arrayID){
+	return this.connected.then(db =>
+		new Promise((resolve, reject) => {
+            try{
+                db.collection("allFood").findOne({"_id": {$nin: arrayID}}, {$sample: { size : 1 }}, function(err, result){
+                    if(err) reject(err);
+                    resolve(result);
+                });
+            } catch(err){
+                reject(new Error(err));
+            }
+		})
+	)
+}
+
+Database.prototype.getBatchRandomFood = function(batchSize){
+	return this.connected.then(db =>
+		new Promise((resolve, reject) => {
+            try{
+                db.collection("allFood").aggregate([{ $sample: { size: batchSize } }]).toArray(function(err, result){
+                    if(err) reject(err);
+                    resolve(result);
+                });
+            } catch(err){
+                reject(new Error(err));
+            }
+		})
+	)
+}
+
 module.exports = Database;

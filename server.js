@@ -50,66 +50,90 @@ bot.start(function(context){
 });
 
 // Message Event: trigger when there's a new message
-bot.on('message', (context) =>{
-    console.log("Message: ", context.update.message);
-    console.log("Forward: ", context.update.message.reply_to_message);
+// bot.on('message', (context) =>{
+//     console.log("Message: ", context.update.message);
+//     console.log("Forward: ", context.update.message.reply_to_message);
 
-    // Computing user's geeting information
-    if(!usersData[context.update.message.chat.username]){
-        bot.telegram.sendMessage(context.update.message.chat.id, conversations.userNotFound);
-    }
-    else if(usersData[context.update.message.chat.username].state < MAX_GREETING_STATE){
-        var state = usersData[context.update.message.chat.username].state;
+//     // Computing user's geeting information
+//     // if(!usersData[context.update.message.chat.username]){
+//     //     bot.telegram.sendMessage(context.update.message.chat.id, conversations.userNotFound);
+//     // }
+//     // else if(usersData[context.update.message.chat.username].state < MAX_GREETING_STATE){
+//     //     var state = usersData[context.update.message.chat.username].state;
 
-        // Update usersData object, adding response and change state
-        switch(state){
-            case 0: usersData[context.update.message.chat.username].prefName = context.update.message.text;    break;
-            case 1: usersData[context.update.message.chat.username].institution = context.update.message.text; break;
-            case 2: usersData[context.update.message.chat.username].foodPref = context.update.message.text;    break;
-            default: 
-        }
-        state++;
-        usersData[context.update.message.chat.username].state = state;
+//     //     // Update usersData object, adding response and change state
+//     //     switch(state){
+//     //         case 0: usersData[context.update.message.chat.username].prefName = context.update.message.text;    break;
+//     //         case 1: usersData[context.update.message.chat.username].institution = context.update.message.text; break;
+//     //         case 2: usersData[context.update.message.chat.username].foodPref = context.update.message.text;    break;
+//     //         default: 
+//     //     }
+//     //     state++;
+//     //     usersData[context.update.message.chat.username].state = state;
 
-        // Response to users
-        if(state < MAX_GREETING_STATE){
-            // Send another message
-            bot.telegram.sendMessage(context.update.message.chat.id, conversations[state],{
-                reply_markup: {
-                    force_reply: true
-                }
-            });
-        } else {
-            // Send another message
-            var outputString = conversations[state] + usersData[context.update.message.chat.username].prefName;
-            bot.telegram.sendMessage(context.update.message.chat.id, outputString);
+//     //     // Response to users
+//     //     if(state < MAX_GREETING_STATE){
+//     //         // Send another message
+//     //         bot.telegram.sendMessage(context.update.message.chat.id, conversations[state],{
+//     //             reply_markup: {
+//     //                 force_reply: true
+//     //             }
+//     //         });
+//     //     } else {
+//     //         // Send another message
+//     //         var outputString = conversations[state] + usersData[context.update.message.chat.username].prefName;
+//     //         bot.telegram.sendMessage(context.update.message.chat.id, outputString);
 
-            // Upload data to database
-            var userInfoDatabase = {};
-            userInfoDatabase.userTelInfo = usersData[context.update.message.chat.username].userTelInfo;
-            userInfoDatabase.prefName = usersData[context.update.message.chat.username].prefName;
-            userInfoDatabase.institution = usersData[context.update.message.chat.username].institution;
-            userInfoDatabase.foodPref = usersData[context.update.message.chat.username].foodPref;
+//     //         // Upload data to database
+//     //         var userInfoDatabase = {};
+//     //         userInfoDatabase.userTelInfo = usersData[context.update.message.chat.username].userTelInfo;
+//     //         userInfoDatabase.prefName = usersData[context.update.message.chat.username].prefName;
+//     //         userInfoDatabase.institution = usersData[context.update.message.chat.username].institution;
+//     //         userInfoDatabase.foodPref = usersData[context.update.message.chat.username].foodPref;
 
-            db.addUser(userInfoDatabase).then((data) =>{
-                console.log("upload user data: ", data);
-            }, (err) => console.log(err));
-        }
-    }
+//     //         db.addUser(userInfoDatabase).then((data) =>{
+//     //             console.log("upload user data: ", data);
+//     //         }, (err) => console.log(err));
+//     //     }
+//     // }
 
-    if(context.update.message.text == "me!"){
-        db.getUser(context.update.message.chat.username).then((data)=>{
-            console.log("Get user data: ", data);
-            bot.telegram.sendMessage(data.userTelInfo.chatid, JSON.stringify(data));
-        }, (err)=> console.log(err))
-    }
-    console.log("usersData: ", usersData);
+//     // if(context.update.message.text == "me!"){
+//     //     db.getUser(context.update.message.chat.username).then((data)=>{
+//     //         console.log("Get user data: ", data);
+//     //         bot.telegram.sendMessage(data.userTelInfo.chatid, JSON.stringify(data));
+//     //     }, (err)=> console.log(err))
+//     // }
+//     // console.log("usersData: ", usersData);
+
+// })
+
+bot.command("/createMenu", (context) => {
+    menuCreator(context);
 })
 
 //** Helper Functions **//
 var sendText = function(chatID, text){
     if(chatID){
         bot.telegram.sendMessage(chatID, text);
+    }
+}
+
+var menuCreator = async function(context){
+    var NUM_MEALS = 14;
+    var menu_of_2meals_7days = [];
+
+    var chatid = context.update.message.chat.id;
+
+    await db.getBatchRandomFood(NUM_MEALS).then((data)=>{
+        menu_of_2meals_7days = data;
+    }, (err)=> console.error(err));
+
+    // Send result to users
+    for(var i = 0; i < NUM_MEALS; i++){
+        var text = "Meal " + (i + 1) + ": " + menu_of_2meals_7days[i].title + ", \nSource: " + menu_of_2meals_7days[i].source;
+
+        // Send text in order
+        await bot.telegram.sendMessage(chatid, text);
     }
 }
 
