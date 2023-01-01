@@ -2,6 +2,7 @@ const cheerio = require("cheerio");
 const axios = require("axios");
 const fs = require("fs");
 const Database = require('./../Database.js');
+const natural = require('natural');
 
 /** 
  * MongoDB setup
@@ -55,9 +56,9 @@ async function getRecipe_Tasty(url, tags){
         })
         const $ = cheerio.load(res.data);
         var food = {
-            title: $("h1.recipe-name").text(),
-            description: $("p.description").text(),
-            imgurl: $("div.main-image").find("img").attr('src'),
+            title: $("h1.recipe-name").text() || $('meta[property="og:title"]').attr('content'),
+            description: $("p.description").text() || $('meta[property="og:description"]').attr('content'),
+            imgurl: $("div.main-image").find("img").attr('src') || $('meta[property="og:image"]').attr('content'),
             prepTime: $("div.recipe-time-container").find("p").eq(2).text(),
             cookTime: $("div.recipe-time-container").find("p").eq(4).text(),
             servingSize: parseInt($("p.servings-display").eq(0).text().replace(/[a-zA-Z]|\s/g, '')),
@@ -65,7 +66,8 @@ async function getRecipe_Tasty(url, tags){
             source: url,
             webName: "",
             nutrition: [],
-            tags: tags
+            tags: tags,
+            search: ""
         }
 
         // Get a list of ingredients
@@ -86,6 +88,9 @@ async function getRecipe_Tasty(url, tags){
                 food.nutrition.push(i);
         })
 
+        // Get searchable string of ingredients
+        food.search = getIngredientTasty(food.ingredients);
+
         // Add data to tastyObj
         tastyObj.push(food);
 
@@ -96,9 +101,62 @@ async function getRecipe_Tasty(url, tags){
     }
 }
 
+function getIngredientTasty(arr){
+    var rgxUnits = /teaspoon|tablespoon|fluid ounce|cup|pint|quart|gallon|milliliter|liter|gram|kilogram/g;
+    var rgxPar = /\(([^)]+)\)/g;
+    var rgxNum = /\d+/g;
+    var rgxPun = /[\u2000-\u206F\u2E00-\u2E7F\\'!"#$%&()*+,\-.\/:;<=>?@\[\]^_`{|}~]/g;
+
+    var outputString = "";
+    var outputArray = [];
+    for(var i of arr){
+        // Convert to lower case
+        var low_case = i.toLowerCase();
+
+        // Remove using regex above
+        low_case = low_case.replace(rgxUnits, '');
+        low_case = low_case.replace(rgxPar, '');
+        low_case = low_case.replace(rgxNum, '');
+        low_case = low_case.replace(rgxPun, '');
+
+        // extract nouns
+        // Tokenize the text
+        var tokenizer = new natural.WordTokenizer();
+        const tokens = tokenizer.tokenize(low_case);
+
+        // Tag the tokens with their parts of speech
+        const language = "EN"
+        const defaultCategory = 'N';
+        const defaultCategoryCapitalized = 'NNP';
+
+        var lexicon = new natural.Lexicon(language, defaultCategory, defaultCategoryCapitalized);
+        var ruleSet = new natural.RuleSet('EN');
+        var tagger = new natural.BrillPOSTagger(lexicon, ruleSet);
+        const tags = tagger.tag(tokens);
+
+
+        // Extract the nouns from the tagged tokens and put into outputString
+        for (var word in tags.taggedWords){
+            if(tags.taggedWords[word].tag === 'NN'){
+                outputString += " " + tags.taggedWords[word].token; 
+            }
+                
+        }
+
+        // Remove douplicated words
+        const words = outputString.split(' ');
+        outputArray = words.filter((word, i) => words.indexOf(word) === i);
+
+    }
+
+    return outputArray;
+}
+
 async function findTasty(){
     for(var i of tastyURL){
         var food = await getRecipe_Tasty(i);
+
+        console.log(food);
 
         // Add food the Database
         await db.addFood(food).then((data)=>{
