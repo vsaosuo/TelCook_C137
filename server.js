@@ -24,7 +24,7 @@ const conversations ={
     2: "Okay lastely, please choose the food preference below",
     3: "It's nice meeting you, ",
     userNotFound: "Hmm...\nLooks like we haven't know each other yet. Try typing '/start' if you want me to know you.",
-    greeting: "Hello there!! \nThis is Glip Glop, your personal chef. I am happy to help you. Okay first, let's get to know each other better."
+    greeting: "Hello there!! \nThis is Glip Glop, your personal chef. I am happy to help you. To use the bot type /help."
 }
 var getFoodConvers = {
     0: "Okay cool!\nPlease select the main ingredients you want to use.",
@@ -39,11 +39,11 @@ bot.start(function(context){
     var chatid = context.update.message.chat.id;
     context.reply(conversations.greeting);
     // bot.telegram.sendPoll(chatid, "First, how should I call you?", ["a", "b"], {allows_multiple_answers: false, type: "regular"});
-    bot.telegram.sendMessage(chatid, conversations[0], {
-        reply_markup: {
-            force_reply: true
-        }
-    });
+    // bot.telegram.sendMessage(chatid, conversations[0], {
+    //     reply_markup: {
+    //         force_reply: true
+    //     }
+    // });
 
     context.update.message.from.chatid = context.update.message.chat.id;
     // Setup data type
@@ -56,7 +56,14 @@ bot.start(function(context){
     }
 });
 
+bot.command("/help", (context) => {
+    var message = "I'm here to help!\n";
+    message += "It's Pickle Bot here. I'm here to assist you with food management to help cook cheaper, healthier, and faster. I'm not the creator of those foods, instead, I'm more of a manager. Currently, I have two functions:\n";
+    message += "\n 1. /getfood - this will give you up to 5 suggested foods that best match the list of ingredients you provided. To differentiate between ingredients, make sure to use a semicolon (';'), comma (','), or a new line.\n";
+    message += "\n 2. /createmenu - this will give you 14 meals for only lunch and dinner Monday to Sunday. I will give you a shopping list at the end which you could take to buy at your local groceries store.";
 
+    bot.telegram.sendMessage(context.update.message.chat.id, message);
+})
 
 bot.command("/getfood", (context) => {
     var chatid = context.update.message.chat.id;
@@ -197,7 +204,7 @@ var findMatchFood = async function(context, ingredList){
         bot.telegram.sendMessage(chatid, getFoodConvers.foundResult, {reply_to_message_id: replyMessageID});
 
         for(var i = 0; i < mealFound.length; i++){
-            var text = "Recommendation " + (i + 1) + "\n" + mealFound[i].title + ", \nSource\n" + mealFound[i].source;
+            var text = "Recommendation " + (i + 1) + ": " + mealFound[i].title + " \nSource: " + mealFound[i].source;
 
             // Send text in order
             await bot.telegram.sendMessage(chatid, text);
