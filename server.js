@@ -26,6 +26,12 @@ const conversations ={
     userNotFound: "Hmm...\nLooks like we haven't know each other yet. Try typing '/start' if you want me to know you.",
     greeting: "Hello there!! \nThis is Glip Glop, your personal chef. I am happy to help you. Okay first, let's get to know each other better."
 }
+var getFoodConvers = {
+    0: "Okay cool!\nPlease select the main ingredients you want to use.",
+    opps: "Sorry, I can't read your input. Try again, /getFood.",
+    foundResult: "This is that I found for the request of the reply message.",
+    noResult: "I'm sorry, I cannot find a matched food from the given ingredients.\nMaybe try simpler ingredients."
+}
 var usersData = {};
 
 // Start Event: user first contact to bot
@@ -50,30 +56,19 @@ bot.start(function(context){
     }
 });
 
-bot.command("/createMenu", (context) => {
-    menuCreator(context);
-})
 
-var getFoodConvers = {
-    0: "Okay cool!\nPlease select the main ingredients you want to use.",
-    opps: "Sorry, I can't read your input. Try again, /getFood.",
-    foundResult: "This is that I found for the request of the reply message.",
-    noResult: "I'm sorry, I cannot find a matched food from the given ingredients.\nMaybe try simpler ingredients."
-}
 
-const options = ['Option 1', 'Option 2', 'Option 3'];
-
-const markup = {
-  inline_keyboard: keyboard,
-};
-
-bot.command("/getFood", (context) => {
+bot.command("/getfood", (context) => {
     var chatid = context.update.message.chat.id;
     bot.telegram.sendMessage(chatid, getFoodConvers[0], {
         reply_markup: {
             force_reply: true
         }
     });
+})
+
+bot.command("/createmenu", (context) => {
+    menuCreator(context);
 })
 
 // Message Event: trigger when there's a new message
