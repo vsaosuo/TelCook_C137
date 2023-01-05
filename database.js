@@ -115,4 +115,42 @@ Database.prototype.getBatchRandomFood = function(batchSize){
 	)
 }
 
+Database.prototype.get5FoodsMatched = function(ingredients, numMeals){
+	return this.connected.then(db =>
+		new Promise((resolve, reject) => {
+            try{
+                db.collection("allFood").aggregate([
+                    {
+                      $unwind: "$search"
+                    },
+                    {
+                      $match: {
+                        search: { $in: ingredients }
+                      }
+                    },
+                    {
+                      $group: {
+                        _id: "$_id",
+                        count: { $sum: 1 }
+                      }
+                    },
+                    {
+                      $sort: {
+                        count: -1
+                      }
+                    },
+                    {
+                      $limit: numMeals
+                    }
+                ]).toArray(function(err, result){
+                    if(err) reject(err);
+                    resolve(result);
+                });
+            } catch(err){
+                reject(new Error(err));
+            }
+		})
+	)
+}
+
 module.exports = Database;
