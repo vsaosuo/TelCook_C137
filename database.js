@@ -121,26 +121,32 @@ Database.prototype.get5FoodsMatched = function(ingredients, numMeals){
             try{
                 db.collection("allFood").aggregate([
                     {
-                      $unwind: "$search"
+                        $unwind: "$search"
                     },
                     {
-                      $match: {
-                        search: { $in: ingredients }
-                      }
+                        $match: {
+                            search: { $in: ingredients }
+                        }
                     },
                     {
-                      $group: {
-                        _id: "$_id",
-                        count: { $sum: 1 }
-                      }
+                        $group: {
+                            _id: "$_id",
+                            count: { $sum: 1 },
+                            doc: { $first: "$$ROOT" }
+                        }
                     },
                     {
-                      $sort: {
-                        count: -1
-                      }
+                        $sort: {
+                            count: -1
+                        }
                     },
                     {
-                      $limit: numMeals
+                        $limit: numMeals
+                    },
+                    {
+                        $replaceRoot: {
+                            newRoot: "$doc"
+                        }
                     }
                 ]).toArray(function(err, result){
                     if(err) reject(err);

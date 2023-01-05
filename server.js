@@ -55,9 +55,9 @@ bot.command("/createMenu", (context) => {
 })
 
 var getFoodConvers = {
-    0: "Okay cool!\nPlease select the main ingredients you want to use. ",
+    0: "Okay cool!\nPlease select the main ingredients you want to use.",
     opps: "Sorry, I can't read your input. Try again, /getFood.",
-    foundResult: "What is that I found for the request of the reply message.",
+    foundResult: "This is that I found for the request of the reply message.",
     noResult: "I'm sorry, I cannot find a matched food from the given ingredients.\nMaybe try simpler ingredients."
 }
 
@@ -126,7 +126,6 @@ bot.on('message', (context) =>{
     //     }, (err)=> console.log(err))
     // }
 
-
     // COMMAND: Message check for '/getFood' command
     if(context.update.message.reply_to_message && context.update.message.reply_to_message.text == getFoodConvers[0]){
         // Convert to lower case
@@ -142,7 +141,7 @@ bot.on('message', (context) =>{
         else{
             if(response.includes(ingredSeperator[0])) ingredList = response.split(ingredSeperator[0]);
             else if(response.includes(ingredSeperator[1])) ingredList = response.split(ingredSeperator[1]);
-            else if(response.includes(ingredSeperator[2])) ingredList = response.split(ingredSeperator[2]);
+            else ingredList = response.split(ingredSeperator[2]);
         }
 
         // Invoke findMatchFood() function
@@ -183,23 +182,31 @@ var findMatchFood = async function(context, ingredList){
     var mealFound;
 
     // Query to database
+    if(!ingredList){ 
+        bot.telegram.sendMessage(chatid, getFoodConvers.noResult, {reply_to_message_id: replyMessageID});
+        return ;
+    }
+
     await db.get5FoodsMatched(ingredList, NUM_MEALS).then((foodsMatched)=>{
         // Print out result
-        if(!foodsMatched)   bot.telegram.sendMessage(chatid, getFoodConvers.noResult, {reply_to_message_id: replyMessageID});
-        else{
+        if(Array.isArray(foodsMatched) && foodsMatched.length != 0 ){
             mealFound = foodsMatched;
+        }else{
+            bot.telegram.sendMessage(chatid, getFoodConvers.noResult, {reply_to_message_id: replyMessageID});
         }
         
     }, (err) => console.error(err));
     
     // Print results to user
-    bot.telegram.sendMessage(chatid, getFoodConvers.foundResult, {reply_to_message_id: replyMessageID});
+    if(Array.isArray(mealFound) && mealFound.length != 0){
+        bot.telegram.sendMessage(chatid, getFoodConvers.foundResult, {reply_to_message_id: replyMessageID});
 
-    for(var i = 0; i < NUM_MEALS; i++){
-        var text = "Recommendation " + (i + 1) + "\n" + mealFound[i].title + ", \nSource\n" + mealFound[i].source;
+        for(var i = 0; i < mealFound.length; i++){
+            var text = "Recommendation " + (i + 1) + "\n" + mealFound[i].title + ", \nSource\n" + mealFound[i].source;
 
-        // Send text in order
-        await bot.telegram.sendMessage(chatid, text);
+            // Send text in order
+            await bot.telegram.sendMessage(chatid, text);
+        }
     }
 }
 
