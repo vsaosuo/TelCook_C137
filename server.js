@@ -1,5 +1,11 @@
+// Environment Data
+// const {tel_token, db_username, db_pass} = require('./env.json');
+require('dotenv').config();
+const tel_token = process.env.tel_token;
+const db_username = process.env.db_username;
+const db_pass = process.env.db_pass;
+
 // Telegram setup
-const {tel_token, db_username, db_pass} = require('./env.json');
 const { Telegraf } = require('telegraf');
 const bot = new Telegraf(tel_token);
 
