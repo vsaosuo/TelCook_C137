@@ -1,5 +1,5 @@
 // Telegram setup
-const {tel_token} = require('./env.json');
+const {tel_token, db_username, db_pass} = require('./env.json');
 const { Telegraf } = require('telegraf');
 const bot = new Telegraf(tel_token);
 
@@ -12,7 +12,8 @@ const { keyboard } = require('telegraf');
  *  Database name: glipglopfood
  *  On success: [MongoClient] Connected to mongodb://localhost:27017/glipglopfood
  */
-var db = Database("mongodb://localhost:27017", "glipglopfood");
+// var db = Database("mongodb://localhost:27017", "glipglopfood");
+var db = Database("mongodb+srv://" + db_username + ":"+ db_pass + "@cluster0.zhwxxac.mongodb.net/?retryWrites=true&w=majority", "glipglopfood");
 
 
 /* ---------- Telegram Section ---------- */

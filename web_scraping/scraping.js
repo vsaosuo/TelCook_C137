@@ -3,6 +3,8 @@ const axios = require("axios");
 const fs = require("fs");
 const Database = require('./../Database.js');
 const natural = require('natural');
+const {tel_token, db_username, db_pass} = require('../env.json');
+
 
 /** 
  * MongoDB setup
@@ -10,7 +12,9 @@ const natural = require('natural');
  *  Database name: glipglopfood
  *  On success: [MongoClient] Connected to mongodb://localhost:27017/glipglopfood
  */
-var db = Database("mongodb://localhost:27017", "glipglopfood");
+// var db = Database("mongodb://localhost:27017", "glipglopfood");
+var db = Database("mongodb+srv://" + db_username + ":"+ db_pass + "@cluster0.zhwxxac.mongodb.net/?retryWrites=true&w=majority", "glipglopfood");
+
 
 var tastyURL = [
     "https://tasty.co/recipe/homemade-dumplings",
