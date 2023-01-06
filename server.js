@@ -2,8 +2,7 @@
 // const {tel_token, db_username, db_pass} = require('./env.json');
 require('dotenv').config();
 const tel_token = process.env.tel_token;
-const db_username = process.env.db_username;
-const db_pass = process.env.db_pass;
+const db_url = process.env.db_url;
 
 // Telegram setup
 const { Telegraf } = require('telegraf');
@@ -19,7 +18,7 @@ const { keyboard } = require('telegraf');
  *  On success: [MongoClient] Connected to mongodb://localhost:27017/glipglopfood
  */
 // var db = Database("mongodb://localhost:27017", "glipglopfood");
-var db = Database("mongodb+srv://" + db_username + ":"+ db_pass + "@cluster0.zhwxxac.mongodb.net/?retryWrites=true&w=majority", "glipglopfood");
+var db = Database(db_url, "glipglopfood");
 
 
 /* ---------- Telegram Section ---------- */
