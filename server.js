@@ -27,9 +27,9 @@ const conversations ={
     greeting: "Hello there!! \nThis is Glip Glop, your personal chef. I am happy to help you. To use the bot type /help."
 }
 var getFoodConvers = {
-    0: "Okay cool!\nPlease select the main ingredients you want to use.",
+    0: "Okay cool!\nPlease provide me the main ingredients you want to use in your food. Only use one of a semicolon (';'), comma (','), or a new line to seperate between ingredients.",
     opps: "Sorry, I can't read your input. Try again, /getFood.",
-    foundResult: "This is that I found for the request of the reply message.",
+    foundResult: "This is that I found to the request of this reply message.",
     noResult: "I'm sorry, I cannot find a matched food from the given ingredients.\nMaybe try simpler ingredients."
 }
 var usersData = {};
@@ -45,21 +45,27 @@ bot.start(function(context){
     //     }
     // });
 
-    context.update.message.from.chatid = context.update.message.chat.id;
+    // context.update.message.from.chatid = context.update.message.chat.id;
+
     // Setup data type
-    usersData[context.update.message.chat.username] = {
-        state: 0,   /* 0: get name; 1: get university; 2: get food preference; 3: final word*/
-        userTelInfo: context.update.message.from,   /* field info { id, is_bot, first_name, last_name, username, language_code } */
-        prefName: "",
-        institution: "",
-        foodPref: ""
-    }
+    // usersData[context.update.message.chat.username] = {
+    //     state: 0,   /* 0: get name; 1: get university; 2: get food preference; 3: final word*/
+    //     userTelInfo: context.update.message.from,   /* field info { id, is_bot, first_name, last_name, username, language_code } */
+    //     prefName: "",
+    //     institution: "",
+    //     foodPref: ""
+    // }
+
+    // Upload data to database
+    db.addUser(context.update.message.from).then((data) =>{
+        console.log("upload user data: ", data);
+    }, (err) => console.log(err));
 });
 
 bot.command("/help", (context) => {
     var message = "I'm here to help!\n";
     message += "It's Pickle Bot here. I'm here to assist you with food management to help cook cheaper, healthier, and faster. I'm not the creator of those foods, instead, I'm more of a manager. Currently, I have two functions:\n";
-    message += "\n 1. /getfood - this will give you up to 5 suggested foods that best match the list of ingredients you provided. To differentiate between ingredients, make sure to use a semicolon (';'), comma (','), or a new line.\n";
+    message += "\n 1. /getfood - this will give you up to 5 suggested foods that best match the list of ingredients you provided. To differentiate between ingredients, make sure to only use a semicolon (';'), comma (','), or a new line (do not mix it).\n";
     message += "\n 2. /createmenu - this will give you 14 meals for only lunch and dinner Monday to Sunday. I will give you a shopping list at the end which you could take to buy at your local groceries store.";
 
     bot.telegram.sendMessage(context.update.message.chat.id, message);

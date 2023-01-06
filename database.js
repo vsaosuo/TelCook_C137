@@ -33,7 +33,7 @@ Database.prototype.addUser = function(userData){
             try{
                 if(userData)
                     // Only update the exist user
-                    db.collection("users").replaceOne({"userTelInfo.username": userData.userTelInfo.username}, userData, { upsert: true }, function(err, result){
+                    db.collection("users").replaceOne({"userTelInfo.username": userData.username}, userData, { upsert: true }, function(err, result){
                         if(err) reject(err);
 
                         if(result.acknowledged) resolve(result);
