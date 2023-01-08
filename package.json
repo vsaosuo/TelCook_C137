@@ -5,6 +5,7 @@
     "dotenv": "^16.0.3",
     "mongodb": "^4.13.0",
     "natural": "^6.0.1",
+    "sizeof": "^1.0.0",
     "telegraf": "^4.11.2"
   },
   "engines": {

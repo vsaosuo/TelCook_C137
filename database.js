@@ -33,7 +33,7 @@ Database.prototype.addUser = function(userData){
             try{
                 if(userData)
                     // Only update the exist user
-                    db.collection("users").replaceOne({"userTelInfo.username": userData.username}, userData, { upsert: true }, function(err, result){
+                    db.collection("users").replaceOne({"username": userData.username}, userData, { upsert: true }, function(err, result){
                         if(err) reject(err);
 
                         if(result.acknowledged) resolve(result);
@@ -55,7 +55,7 @@ Database.prototype.getUser = function(username){
 		new Promise((resolve, reject) => {
             try{
                 if(username)
-                    db.collection("users").findOne({"userTelInfo.username": username}, function(err, result){
+                    db.collection("users").findOne({"username": username}, function(err, result){
                         if(err) reject(err);
                         resolve(result);
                     });

@@ -4,6 +4,7 @@ const fs = require("fs");
 const Database = require('./../Database.js');
 const natural = require('natural');
 const {tel_token, db_username, db_pass} = require('../env.json');
+const sizeof = require('sizeof');
 
 
 /** 
@@ -16,84 +17,91 @@ const {tel_token, db_username, db_pass} = require('../env.json');
 var db = Database("mongodb+srv://" + db_username + ":"+ db_pass + "@cluster0.zhwxxac.mongodb.net/?retryWrites=true&w=majority", "glipglopfood");
 
 
-var tastyURL = [
-    "https://tasty.co/recipe/homemade-dumplings",
-    "https://tasty.co/recipe/salmon-sinigang-as-made-by-ruby-ibarra",
-    "https://tasty.co/recipe/chicken-teriyaki-chow-mein",
-    "https://tasty.co/recipe/chicken-biscuits-bake",
-    "https://tasty.co/recipe/taco-soup",
-    "https://tasty.co/recipe/one-pot-lemon-garlic-shrimp-pasta",
-    "https://tasty.co/recipe/chicken-veggie-stir-fry",
-    "https://tasty.co/article/jesseszewczyk/back-to-school-family-dinner-mealplan-recipes",
-    "https://tasty.co/recipe/easy-butter-chicken",
-    "https://tasty.co/recipe/bacon-and-egg-ramen",
-    "https://tasty.co/recipe/easy-chicken-alfredo-penne",
-    "https://tasty.co/recipe/weekday-meal-prep-pesto-chicken-veggies",
-    "https://tasty.co/recipe/protein-packed-buddha-bowl",
-    "https://tasty.co/recipe/3-ingredient-teriyaki-chicken",
-    "https://tasty.co/recipe/cheesy-chicken-alfredo-pasta-bake",
-    "https://tasty.co/recipe/paprika-chicken-rice ",
-    "https://tasty.co/recipe/creamy-tuscan-chicken",
-    "https://tasty.co/recipe/one-pot-garlic-parmesan-pasta",
-    "https://tasty.co/recipe/chicken-veggie-stir-fry",
-    "https://tasty.co/recipe/creamy-lemon-chicken",
-    "https://tasty.co/recipe/one-pan-honey-garlic-chicken",
-    "https://tasty.co/recipe/one-pot-chicken-fajita-pasta",
-    "https://tasty.co/recipe/creamy-chicken-penne-pasta",
-    "https://tasty.co/recipe/slow-cooker-chicken-biscuits",
-    "https://tasty.co/recipe/cheesy-chicken-and-broccoli-pasta",
-    "https://tasty.co/recipe/garlic-brown-sugar-chicken",
-    "https://tasty.co/recipe/easy-chicken-piccata",
-    "https://tasty.co/recipe/one-pot-chicken-and-mushroom-pasta",
-    "https://tasty.co/recipe/chicken-teriyaki-chow-mein",
-    "https://tasty.co/recipe/chicken-teriyaki-fried-rice",
-    "https://tasty.co/recipe/cajun-chicken-alfredo",
-    "https://tasty.co/recipe/classic-chicken-noodle-soup"
-];
+// var tastySubURL = [
+//     "https://tasty.co/recipe/homemade-dumplings",
+//     "https://tasty.co/recipe/salmon-sinigang-as-made-by-ruby-ibarra",
+//     "https://tasty.co/recipe/chicken-teriyaki-chow-mein",
+//     "https://tasty.co/recipe/chicken-biscuits-bake",
+//     "https://tasty.co/recipe/taco-soup",
+//     "https://tasty.co/recipe/one-pot-lemon-garlic-shrimp-pasta",
+//     "https://tasty.co/recipe/chicken-veggie-stir-fry",
+//     "https://tasty.co/article/jesseszewczyk/back-to-school-family-dinner-mealplan-recipes",
+//     "https://tasty.co/recipe/easy-butter-chicken",
+//     "https://tasty.co/recipe/bacon-and-egg-ramen",
+//     "https://tasty.co/recipe/easy-chicken-alfredo-penne",
+//     "https://tasty.co/recipe/weekday-meal-prep-pesto-chicken-veggies",
+//     "https://tasty.co/recipe/protein-packed-buddha-bowl",
+//     "https://tasty.co/recipe/3-ingredient-teriyaki-chicken",
+//     "https://tasty.co/recipe/cheesy-chicken-alfredo-pasta-bake",
+//     "https://tasty.co/recipe/paprika-chicken-rice ",
+//     "https://tasty.co/recipe/creamy-tuscan-chicken",
+//     "https://tasty.co/recipe/one-pot-garlic-parmesan-pasta",
+//     "https://tasty.co/recipe/chicken-veggie-stir-fry",
+//     "https://tasty.co/recipe/creamy-lemon-chicken",
+//     "https://tasty.co/recipe/one-pan-honey-garlic-chicken",
+//     "https://tasty.co/recipe/one-pot-chicken-fajita-pasta",
+//     "https://tasty.co/recipe/creamy-chicken-penne-pasta",
+//     "https://tasty.co/recipe/slow-cooker-chicken-biscuits",
+//     "https://tasty.co/recipe/cheesy-chicken-and-broccoli-pasta",
+//     "https://tasty.co/recipe/garlic-brown-sugar-chicken",
+//     "https://tasty.co/recipe/easy-chicken-piccata",
+//     "https://tasty.co/recipe/one-pot-chicken-and-mushroom-pasta",
+//     "https://tasty.co/recipe/chicken-teriyaki-chow-mein",
+//     "https://tasty.co/recipe/chicken-teriyaki-fried-rice",
+//     "https://tasty.co/recipe/cajun-chicken-alfredo",
+//     "https://tasty.co/recipe/classic-chicken-noodle-soup"
+// ];
 
+var tastyMainURL = [
+    'https://tasty.co/api/proxy/tasty/feed-page?from=0&size=180&slug=pork&type=ingredient',         // Prok Recipes
+    'https://tasty.co/api/proxy/tasty/feed-page?from=0&size=2080&slug=chicken&type=ingredient',     // Chicken Recipes
+    'https://tasty.co/api/proxy/tasty/feed-page?from=0&size=2080&slug=ground-beef&type=ingredient'];
+var tastySubURL = [];
 var tastyObj = [];
 
 async function getRecipe_Tasty(url, tags){
     try{
+        console.log("url: ", url, " tags", tags);
         const res = await axios.get(url, {
             headers: { "Accept-Encoding": "gzip,deflate,compress" } 
         })
         const $ = cheerio.load(res.data);
         var food = {
             title: $("h1.recipe-name").text() || $('meta[property="og:title"]').attr('content'),
-            description: $("p.description").text() || $('meta[property="og:description"]').attr('content'),
+            // description: $("p.description").text() || $('meta[property="og:description"]').attr('content'),
             imgurl: $("div.main-image").find("img").attr('src') || $('meta[property="og:image"]').attr('content'),
-            prepTime: $("div.recipe-time-container").find("p").eq(2).text(),
-            cookTime: $("div.recipe-time-container").find("p").eq(4).text(),
-            servingSize: parseInt($("p.servings-display").eq(0).text().replace(/[a-zA-Z]|\s/g, '')),
-            ingredients: [],
+            // prepTime: $("div.recipe-time-container").find("p").eq(2).text(),
+            // cookTime: $("div.recipe-time-container").find("p").eq(4).text(),
+            // servingSize: parseInt($("p.servings-display").eq(0).text().replace(/[a-zA-Z]|\s/g, '')),
+            // ingredients: [],
             source: url,
-            webName: "",
-            nutrition: [],
-            tags: tags,
+            // webName: "",
+            // nutrition: [],
+            // tags: tags,
             search: ""
         }
 
         // Get a list of ingredients
+        var ingredients = [];
         $("div.ingredients__section").find("li").toArray().forEach((ele) => {
             var i = $(ele).text();
-            if(!food.ingredients.includes(i))
-                food.ingredients.push(i);
+            if(!ingredients.includes(i))
+                ingredients.push(i);
         })
         
         // Get site name
-        var weblink= new URL(url);
-        food.webName = weblink.hostname;
+        // var weblink= new URL(url);
+        // food.webName = weblink.hostname;
 
         // Get nutrition details
-        $("div.nutrition-details").find("li").toArray().forEach((ele) => {
-            var i = $(ele).text();
-            if(!food.nutrition.includes(i))
-                food.nutrition.push(i);
-        })
+        // $("div.nutrition-details").find("li").toArray().forEach((ele) => {
+        //     var i = $(ele).text();
+        //     if(!food.nutrition.includes(i))
+        //         food.nutrition.push(i);
+        // })
 
         // Get searchable string of ingredients
-        food.search = getIngredientTasty(food.ingredients);
+        food.search = getIngredientTasty(ingredients);
 
         // Add data to tastyObj
         tastyObj.push(food);
@@ -156,9 +164,35 @@ function getIngredientTasty(arr){
     return outputArray;
 }
 
-async function findTasty(){
-    for(var i of tastyURL){
-        var food = await getRecipe_Tasty(i);
+async function getTastySubLinks(mLink){
+    const TASTY_START_URL = "https://tasty.co/recipe/";
+    var subLinks = [];
+
+    try{
+        const res = await axios.get(mLink, {
+            headers: { "Accept-Encoding": "gzip,deflate,compress" } 
+        })
+
+        // console.log(res.data.items[0]);
+        for(var i of res.data.items){
+            subLinks.push({
+                url: TASTY_START_URL + i.slug,
+                tags: i.tags
+            });
+        }
+        
+    } catch(err){
+        console.error(err);
+    }
+
+    // console.log(subLinks);
+    return subLinks;
+}
+
+async function storeRecipes(calleeFun, urlsList){
+    for(var i of urlsList){
+        
+        var food = await calleeFun(i.url, i.tags);
 
         console.log(food);
 
@@ -172,40 +206,26 @@ async function findTasty(){
     return ;
 }
 
-async function getTastySubLinks(mLink){
-    var subLinks = [];
 
-    try{
-        const res = await axios.get(mLink, {
-            headers: { "Accept-Encoding": "gzip,deflate,compress" } 
-        })
+async function main(){
 
-        // console.log(JSON.parse(res));
-        console.log(res.data.items[0]);
+    // Compute Tasty's SubURL from mainURL
+    for(var i of tastyMainURL){
+        var lists = await getTastySubLinks(i);
+        console.log("lists size: ", lists.length);
 
-        const $ = cheerio.load(res.data);
-
-        // console.log("Running...");
-        // Get a list of ingredients
-        // $("ul.feed__items").toArray().forEach((ele) => {
-        //     var i = $(ele).find('a').attr('href');
-
-        //     console.log(i);
-        // })
-
-        $("main.feed-page").find('a').toArray().forEach((ele) =>{
-            var i = $(ele).attr('href');
-            console.log(i);
-        });
-    } catch(err){
-        console.error(err);
+        tastySubURL = tastySubURL.concat(lists);
     }
+
+    console.log("Number of sub pages: ", tastySubURL.length);
+
+    const sizeInGB = sizeof.sizeof(tastySubURL) / 1073741824;
+    console.log("Size of tastySubURL: ", sizeInGB, " GB");
+
+    // Fetch data from SubURL and store in database
+    storeRecipes(getRecipe_Tasty, tastySubURL);
 }
 
-// findTasty();
-// getTastySubLinks("https://tasty.co/ingredient/pork");
-
-
-getTastySubLinks("https://tasty.co/api/proxy/tasty/feed-page?from=0&size=180&slug=pork&type=ingredient");
+main();
 
 

@@ -213,7 +213,7 @@ var findMatchFood = async function(context, ingredList){
     
     // Print results to user
     if(Array.isArray(mealFound) && mealFound.length != 0){
-        bot.telegram.sendMessage(chatid, getFoodConvers.foundResult, {reply_to_message_id: replyMessageID});
+        await bot.telegram.sendMessage(chatid, getFoodConvers.foundResult, {reply_to_message_id: replyMessageID});
 
         for(var i = 0; i < mealFound.length; i++){
             var text = "Recommendation " + (i + 1) + ": " + mealFound[i].title + " \nSource: " + mealFound[i].source;
