@@ -61,7 +61,7 @@ var tastyObj = [];
 
 async function getRecipe_Tasty(url, tags){
     try{
-        console.log("url: ", url, " tags", tags);
+        // console.log("url: ", url, " tags", tags);
         const res = await axios.get(url, {
             headers: { "Accept-Encoding": "gzip,deflate,compress" } 
         })
@@ -69,7 +69,7 @@ async function getRecipe_Tasty(url, tags){
         var food = {
             title: $("h1.recipe-name").text() || $('meta[property="og:title"]').attr('content'),
             // description: $("p.description").text() || $('meta[property="og:description"]').attr('content'),
-            imgurl: $("div.main-image").find("img").attr('src') || $('meta[property="og:image"]').attr('content'),
+            // imgurl: $("div.main-image").find("img").attr('src') || $('meta[property="og:image"]').attr('content'),
             // prepTime: $("div.recipe-time-container").find("p").eq(2).text(),
             // cookTime: $("div.recipe-time-container").find("p").eq(4).text(),
             // servingSize: parseInt($("p.servings-display").eq(0).text().replace(/[a-zA-Z]|\s/g, '')),
@@ -78,16 +78,16 @@ async function getRecipe_Tasty(url, tags){
             // webName: "",
             // nutrition: [],
             // tags: tags,
-            search: ""
+            search: []
         }
 
         // Get a list of ingredients
-        var ingredients = [];
-        $("div.ingredients__section").find("li").toArray().forEach((ele) => {
-            var i = $(ele).text();
-            if(!ingredients.includes(i))
-                ingredients.push(i);
-        })
+        // var ingredients = [];
+        // $("div.ingredients__section").find("li").toArray().forEach((ele) => {
+        //     var i = $(ele).text();
+        //     if(!ingredients.includes(i))
+        //         ingredients.push(i);
+        // })
         
         // Get site name
         // var weblink= new URL(url);
@@ -101,12 +101,15 @@ async function getRecipe_Tasty(url, tags){
         // })
 
         // Get searchable string of ingredients
-        food.search = getIngredientTasty(ingredients);
+        var dataText = $("script#__NEXT_DATA__").text();        // Get page JSON data in text form
+        var dataJSON = JSON.parse(dataText);
+        food.search = getTastyIngredients(dataJSON);        // JSON version
+        // food.search = getIngredientTasty(ingredients);   // Hardcoded version
 
         // Add data to tastyObj
         tastyObj.push(food);
 
-        // console.log(food);
+        console.log(food);
         return food;
     } catch (err) {
         console.error(err);
@@ -206,6 +209,36 @@ async function storeRecipes(calleeFun, urlsList){
     return ;
 }
 
+// Fetch Tasty's web page data
+async function fetchJsonTasty(url){
+    const res = await axios.get(url, {
+        headers: { "Accept-Encoding": "gzip,deflate,compress" } 
+    })
+    const $ = cheerio.load(res.data);
+    var dataText = $("script#__NEXT_DATA__").text();        // Get page JSON data in text form
+    var dataJSON = JSON.parse(dataText);
+    // console.log(dataJSON.props.pageProps.recipe);   // recipe content
+    console.log(dataJSON.props.pageProps.recipe.ingredient_sections[0].ingredients);        // list of ingredients
+
+    // Forming ingredients arrays
+    var ingred  = [];
+    for(var i of dataJSON.props.pageProps.recipe.ingredient_sections[0].ingredients){
+        ingred.push(i.name);
+    }
+
+    console.log("ingred: ", ingred);
+}
+
+// Generate ingredients arrays from page JSON file
+function getTastyIngredients(dataJSON){
+    // Forming ingredients arrays
+    var ingred  = [];
+    for(var i of dataJSON.props.pageProps.recipe.ingredient_sections[0].ingredients){
+        ingred.push(i.name);
+    }
+
+    return ingred;
+}
 
 async function main(){
 
@@ -226,6 +259,9 @@ async function main(){
     storeRecipes(getRecipe_Tasty, tastySubURL);
 }
 
-main();
+// main();
+
+// fetchJsonTasty("https://tasty.co/recipe/spicy-korean-bbq-style-pork");
+getRecipe_Tasty("https://tasty.co/recipe/spicy-korean-bbq-style-pork", ["a"]);
 
 
