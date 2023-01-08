@@ -205,7 +205,6 @@ async function storeRecipes(calleeFun, urlsList){
         }, (err)=> console.log(err));
     }
     // fs.writeFile('./web_scraping/food_documents.json', JSON.stringify(tastyObj), 'utf8', ()=>{});
-    console.log("done");
     return ;
 }
 
@@ -257,11 +256,14 @@ async function main(){
 
     // Fetch data from SubURL and store in database
     storeRecipes(getRecipe_Tasty, tastySubURL);
+
+    console.log("done");
 }
 
-// main();
+// Run main function
+main();
 
 // fetchJsonTasty("https://tasty.co/recipe/spicy-korean-bbq-style-pork");
-getRecipe_Tasty("https://tasty.co/recipe/spicy-korean-bbq-style-pork", ["a"]);
+// getRecipe_Tasty("https://tasty.co/recipe/spicy-korean-bbq-style-pork", ["a"]);
 
 
