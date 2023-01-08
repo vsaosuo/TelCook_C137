@@ -172,9 +172,40 @@ async function findTasty(){
     return ;
 }
 
-findTasty();
+async function getTastySubLinks(mLink){
+    var subLinks = [];
+
+    try{
+        const res = await axios.get(mLink, {
+            headers: { "Accept-Encoding": "gzip,deflate,compress" } 
+        })
+
+        // console.log(JSON.parse(res));
+        console.log(res.data.items[0]);
+
+        const $ = cheerio.load(res.data);
+
+        // console.log("Running...");
+        // Get a list of ingredients
+        // $("ul.feed__items").toArray().forEach((ele) => {
+        //     var i = $(ele).find('a').attr('href');
+
+        //     console.log(i);
+        // })
+
+        $("main.feed-page").find('a').toArray().forEach((ele) =>{
+            var i = $(ele).attr('href');
+            console.log(i);
+        });
+    } catch(err){
+        console.error(err);
+    }
+}
+
+// findTasty();
+// getTastySubLinks("https://tasty.co/ingredient/pork");
 
 
-
+getTastySubLinks("https://tasty.co/api/proxy/tasty/feed-page?from=0&size=180&slug=pork&type=ingredient");
 
 
