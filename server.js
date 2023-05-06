@@ -64,7 +64,7 @@ bot.start(function(context){
 
     // Upload data to database
     db.addUser(context.update.message.from).then((data) =>{
-        console.log("upload user data: ", data);
+        // console.log("upload user data: ", data);
     }, (err) => console.log(err));
 });
 
