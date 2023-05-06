@@ -1,29 +1,10 @@
 {
-  "name": "telcook",
-  "version": "1.0.0",
-  "description": "",
-  "main": "server.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/lameofpro/TelCook.git"
-  },
-  "keywords": [
-    "cooking",
-    "fullstack",
-    "chatbot"
-  ],
-  "author": "Visal Saosuo",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/lameofpro/TelCook/issues"
-  },
-  "homepage": "https://github.com/lameofpro/TelCook#readme",
   "dependencies": {
-    "discord.js": "^14.7.1",
-    "express": "^4.18.2",
-    "nodemon": "^2.0.20"
+    "axios": "^1.2.1",
+    "cheerio": "^1.0.0-rc.12",
+    "dotenv": "^16.0.3",
+    "mongodb": "^4.13.0",
+    "natural": "^6.0.1",
+    "telegraf": "^4.11.2"
   }
 }
